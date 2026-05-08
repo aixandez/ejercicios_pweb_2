@@ -4,9 +4,9 @@ from flasgger import Swagger
 app = Flask(__name__)
 swagger = Swagger(app)
 
-# -----------------------------
-# Datos en memoria
-# -----------------------------
+
+# Productos en el carrito y el carrito vacío
+
 products = [
     {"id": 1, "name": "Gato Siamés", "price": 1.50},
     {"id": 2, "name": "Gato Persa", "price": 2.50},
@@ -18,9 +18,9 @@ products = [
 
 cart = []
 
-# -----------------------------
-# GET -> listar productos
-# -----------------------------
+
+# GET para listar los productos
+
 @app.route('/products', methods=['GET'])
 def get_products():
     """
@@ -44,9 +44,9 @@ def get_products():
     return jsonify(products), 200
 
 
-# -----------------------------
-# GET -> ver carrito
-# -----------------------------
+
+# GET para ver el carrito
+
 @app.route('/cart', methods=['GET'])
 def get_cart():
     """
@@ -59,9 +59,9 @@ def get_cart():
     return jsonify(cart), 200
 
 
-# -----------------------------
-# GET -> total  (debe ir ANTES que /cart/<int:product_id>)
-# -----------------------------
+
+# GET para ver el total
+
 @app.route('/cart/total', methods=['GET'])
 def get_total():
     """
@@ -80,9 +80,8 @@ def get_total():
     return jsonify({"total": total}), 200
 
 
-# -----------------------------
-# POST -> agregar producto
-# -----------------------------
+# POST para agregar un producto
+
 @app.route('/cart', methods=['POST'])
 def add_to_cart():
     """
@@ -117,9 +116,9 @@ def add_to_cart():
     return jsonify({"error": "Producto no encontrado"}), 404
 
 
-# -----------------------------
-# DELETE -> eliminar producto
-# -----------------------------
+
+# DELETE para eliminar un producto del carrito
+
 @app.route('/cart/<int:product_id>', methods=['DELETE'])
 def delete_product(product_id):
     """
@@ -145,8 +144,8 @@ def delete_product(product_id):
     return jsonify({"error": "Producto no encontrado en el carrito"}), 404
 
 
-# -----------------------------
+
 # RUN
-# -----------------------------
+
 if __name__ == '__main__':
     app.run(debug=True)
