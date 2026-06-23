@@ -1,0 +1,23 @@
+const express = require('express')
+const app = express()
+const port = 3000
+
+// http://localhost:3000/hola/pepe
+app.get('/hola/:nombre', (req, res) => {
+  res.send(`Hola ${req.params.nombre}`)
+})
+
+// http://localhost:3000/suma/20/30
+app.get('/suma/:x/:y', (req, res) => {
+  const x = parseInt(req.params.x)
+  const y = parseInt(req.params.y)
+  res.send(`Resultado: ${x + y}`)
+})
+
+// http://localhost:3000/nombre/ana/edad/25
+app.get('/nombre/:nombre/edad/:edad', (req, res) => {
+  const { nombre, edad } = req.params
+  res.send(`El usuario ${nombre} tiene ${edad} años`)
+})
+
+app.listen(port, () => console.log('Servidor en http://localhost:3000'))
