@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gatitos Cart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fdf6f0;
+        }
+        h1 {
+            text-align: center;
+            color: #5a3e2b;
+        }
+        h2 {
+            color: #5a3e2b;
+        }
+        .container {
+            display: flex;
+            gap: 30px;
+        }
+        .products, .cart {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .product-item, .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        button {
+            background-color: #5a3e2b;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #7a5c42;
+        }
+        .btn-delete {
+            background-color: #c0392b;
+        }
+        .btn-delete:hover {
+            background-color: #e74c3c;
+        }
+        #total {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 15px;
+            color: #5a3e2b;
+        }
+        #mensaje {
+            text-align: center;
+            color: green;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐱 Gatitos Cart</h1>
+    <p id="mensaje"></p>
+
+    <div class="container">
+        <div class="products">
+            <h2>Productos</h2>
+            <div id="lista-productos"></div>
+        </div>
+
+        <div class="cart">
+            <h2>Carrito</h2>
+            <div id="lista-carrito"></div>
+            <div id="total">Total: $0.00</div>
+        </div>
+    </div>
+
+    <script>
+        // -------------------------
+        // Cargar productos
+        // -------------------------
+        async function cargarProductos() {
+            const res = await fetch('/products')
+            const productos = await res.json()
+            const lista = document.getElementById('lista-productos')
+            lista.innerHTML = ''
+            productos.forEach(p => {
+                const div = document.createElement('div')
+                div.className = 'product-item'
+                div.id = `product-${p.id}`
+                div.innerHTML = `
+                    <span>${p.name} - $${p.price.toFixed(2)}</span>
+                    <button onclick="agregarAlCarrito(${p.id})">Agregar</button>
+                `
+                lista.appendChild(div)
+            })
+        }
+
+        // -------------------------
+        // Cargar carrito
+        // -------------------------
+        async function cargarCarrito() {
+            const res = await fetch('/cart')
+            const carrito = await res.json()
+            const lista = document.getElementById('lista-carrito')
+            lista.innerHTML = ''
+            carrito.forEach(item => {
+                const div = document.createElement('div')
+                div.className = 'cart-item'
+                div.id = `cart-item-${item.product_id}`
+                div.innerHTML = `
+                    <span>${item.name} - $${item.price.toFixed(2)}</span>
+                    <button class="btn-delete" onclick="eliminarDelCarrito(${item.product_id})">Eliminar</button>
+                `
+                lista.appendChild(div)
+            })
+            cargarTotal()
+        }
+
+        // -------------------------
+        // Cargar total
+        // -------------------------
+        async function cargarTotal() {
+            const res = await fetch('/cart/total')
+            const data = await res.json()
+            document.getElementById('total').textContent = `Total: $${data.total.toFixed(2)}`
+        }
+
+        // -------------------------
+        // Agregar al carrito
+        // -------------------------
+        async function agregarAlCarrito(id) {
+            const res = await fetch('/cart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            })
+            if (res.status === 201) {
+                mostrarMensaje('Gatito agregado al carrito')
+                cargarCarrito()
+            }
+        }
+
+        // -------------------------
+        // Eliminar del carrito
+        // -------------------------
+        async function eliminarDelCarrito(product_id) {
+            const res = await fetch(`/cart/${product_id}`, { method: 'DELETE' })
+            if (res.status === 200) {
+                mostrarMensaje('Gatito eliminado del carrito')
+                cargarCarrito()
+            }
+        }
+
+        // -------------------------
+        // Mostrar mensaje temporal
+        // -------------------------
+        function mostrarMensaje(texto) {
+            const msg = document.getElementById('mensaje')
+            msg.textContent = texto
+            setTimeout(() => { msg.textContent = '' }, 2000)
+        }
+
+        // -------------------------
+        // Inicializar
+        // -------------------------
+        cargarProductos()
+        cargarCarrito()
+    </script>
+</body>
+</html>
