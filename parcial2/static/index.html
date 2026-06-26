@@ -84,30 +84,33 @@
         </div>
     </div>
 
-    <script>
-        // -------------------------
-        // Cargar productos
-        // -------------------------
+    <script> //es el que se comunica con flask
+        
+        //funcion para cargar productos,
+        //muestra los productos disponibles para comprar
+        
         async function cargarProductos() {
-            const res = await fetch('/products')
-            const productos = await res.json()
-            const lista = document.getElementById('lista-productos')
-            lista.innerHTML = ''
-            productos.forEach(p => {
-                const div = document.createElement('div')
-                div.className = 'product-item'
-                div.id = `product-${p.id}`
+            const res = await fetch('/products') //peticion http, es como hacer un get products
+            const productos = await res.json() //convierte json en array js
+            const lista = document.getElementById('lista-productos') //busca lista-productos en el html
+            lista.innerHTML = '' // vacia para evitar duplicados
+            productos.forEach(p => { //for que recorre los productos
+                const div = document.createElement('div') //crea 1 div x cada elemento
+                div.className = 'product-item' //le asigna el css
+                div.id = `product-${p.id}` //asigna un id unico
                 div.innerHTML = `
                     <span>${p.name} - $${p.price.toFixed(2)}</span>
-                    <button onclick="agregarAlCarrito(${p.id})">Agregar</button>
-                `
+                    <button onclick="agregarAlCarrito(${p.id})">Agregar</button> 
+                `//si hacn click se agrega al carrito
                 lista.appendChild(div)
             })
         }
 
-        // -------------------------
-        // Cargar carrito
-        // -------------------------
+        
+        //función para cargar carrito
+        //consulta al back solo los productos ya agregados al carrito
+        //hace el mismo proceso que cargarProductos, pero consulta get cart en vez de get products
+
         async function cargarCarrito() {
             const res = await fetch('/cart')
             const carrito = await res.json()
@@ -126,33 +129,35 @@
             cargarTotal()
         }
 
-        // -------------------------
-        // Cargar total
-        // -------------------------
-        async function cargarTotal() {
-            const res = await fetch('/cart/total')
-            const data = await res.json()
-            document.getElementById('total').textContent = `Total: $${data.total.toFixed(2)}`
-        }
+        
+        //funcion para cargar el total,
+        //hace get/cart/total,
+        //y flask responde el total
 
-        // -------------------------
-        // Agregar al carrito
-        // -------------------------
-        async function agregarAlCarrito(id) {
-            const res = await fetch('/cart', {
+        async function cargarTotal() {
+            const res = await fetch('/cart/total') // get al cart total
+            const data = await res.json() //convierte rta json a js
+            document.getElementById('total').textContent = `Total: $${data.total.toFixed(2)}`
+        } // cambia el texto con el total obtenido
+
+        
+        //funcion para agregar al carrito
+        
+        async function agregarAlCarrito(id) { //recibe el id del producto
+            const res = await fetch('/cart', { //esta vez es un POST xq agrega
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: id })
+                headers: { 'Content-Type': 'application/json' }, // le dice a flask que le esta mandando un json
+                body: JSON.stringify({ id: id }) //convierte {id:3} en {"id":3}
             })
-            if (res.status === 201) {
+            if (res.status === 201) { //si flask responde bien, muestra msj y carga carrito
                 mostrarMensaje('Gatito agregado al carrito')
                 cargarCarrito()
             }
         }
 
-        // -------------------------
-        // Eliminar del carrito
-        // -------------------------
+        
+        //funcion para eliminar del carrito
+        //es exactamente lo mismo
         async function eliminarDelCarrito(product_id) {
             const res = await fetch(`/cart/${product_id}`, { method: 'DELETE' })
             if (res.status === 200) {
@@ -161,18 +166,18 @@
             }
         }
 
-        // -------------------------
-        // Mostrar mensaje temporal
-        // -------------------------
+        
+        // mostrar mensaje temporal en la pagina
+        
         function mostrarMensaje(texto) {
-            const msg = document.getElementById('mensaje')
+            const msg = document.getElementById('mensaje') //muestra msj gatito agregado
             msg.textContent = texto
-            setTimeout(() => { msg.textContent = '' }, 2000)
+            setTimeout(() => { msg.textContent = '' }, 2000) //espera 2 seg y lo borra
         }
 
-        // -------------------------
-        // Inicializar
-        // -------------------------
+        
+        // inicializa funciones
+        
         cargarProductos()
         cargarCarrito()
     </script>
